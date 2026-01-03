@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/MachineLearning/credit-risk-engine/mlruns/866294776621734270/9dcce824c38f487aa79a1d7a2cfbe5a3/artifacts
+end_time: 1767451826450
+entry_point_name: ''
+experiment_id: '866294776621734270'
+lifecycle_stage: active
+run_id: 9dcce824c38f487aa79a1d7a2cfbe5a3
+run_name: masked-ape-690
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1767451781885
+status: 3
+tags: []
+user_id: prade

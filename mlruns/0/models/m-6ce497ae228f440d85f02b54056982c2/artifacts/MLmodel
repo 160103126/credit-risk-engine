@@ -1,0 +1,21 @@
+artifact_path: file:///C:/MachineLearning/credit-risk-engine/mlruns/0/models/m-6ce497ae228f440d85f02b54056982c2/artifacts
+flavors:
+  lightgbm:
+    code: null
+    data: model.pkl
+    lgb_version: 4.6.0
+    model_class: lightgbm.sklearn.LGBMClassifier
+  python_function:
+    data: model.pkl
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.lightgbm
+    python_version: 3.10.0
+mlflow_version: 3.2.0
+model_id: m-6ce497ae228f440d85f02b54056982c2
+model_size_bytes: 7108
+model_uuid: m-6ce497ae228f440d85f02b54056982c2
+prompts: null
+run_id: 6258fcd9060f49fb81c7bf21cae264d4
+utc_time_created: '2026-01-03 16:30:44.729683'

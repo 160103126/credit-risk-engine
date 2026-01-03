@@ -1,0 +1,18 @@
+# Configuration file for paths, parameters, and thresholds
+paths:
+  data_raw: "data/raw"
+  data_processed: "data/processed"
+  data_samples: "data/samples"
+  models: "models"
+  reports: "reports"
+
+parameters:
+  model:
+    n_estimators: 1000
+    learning_rate: 0.05
+    objective: "binary"
+    random_state: 42
+
+thresholds:
+  reject_rate: 0.15
+  ks_threshold: 0.3  # example

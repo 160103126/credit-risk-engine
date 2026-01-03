@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/MachineLearning/credit-risk-engine/mlruns/0/eb1a8892bcdd4109a1c4e56b47839b2d/artifacts
+end_time: 1767457820673
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: eb1a8892bcdd4109a1c4e56b47839b2d
+run_name: capricious-skunk-627
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1767457798529
+status: 3
+tags: []
+user_id: prade

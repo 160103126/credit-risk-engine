@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "credit-risk-engine"
+version = "0.1.0"
+description = "Credit risk assessment engine"
+dependencies = [
+    "pandas",
+    "numpy",
+    "scikit-learn",
+    "lightgbm",
+    "shap",
+    "fastapi",
+    "uvicorn",
+    "pytest",
+    "pyyaml"
+]

@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/MachineLearning/credit-risk-engine/mlruns/0/6258fcd9060f49fb81c7bf21cae264d4/artifacts
+end_time: 1767457856712
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 6258fcd9060f49fb81c7bf21cae264d4
+run_name: amazing-lamb-258
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1767457842596
+status: 3
+tags: []
+user_id: prade

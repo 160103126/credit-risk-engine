@@ -1,0 +1,14 @@
+# Logging configuration
+version: 1
+disable_existing_loggers: false
+formatters:
+  simple:
+    format: '%(levelname)s - %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: simple
+    level: DEBUG
+root:
+  level: DEBUG
+  handlers: [console]

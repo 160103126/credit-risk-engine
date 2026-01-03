@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/MachineLearning/credit-risk-engine/mlruns/866294776621734270/9d56b8b7a1c145e28169e8c788f01d68/artifacts
+end_time: 1767458032310
+entry_point_name: ''
+experiment_id: '866294776621734270'
+lifecycle_stage: active
+run_id: 9d56b8b7a1c145e28169e8c788f01d68
+run_name: masked-trout-303
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1767458000183
+status: 3
+tags: []
+user_id: prade
