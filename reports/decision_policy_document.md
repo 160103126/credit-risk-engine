@@ -61,16 +61,16 @@ Evaluated reject rates: 5%, 10%, 15%, 20%
 ### Confusion Matrix (Validation Set)
 ```
 Actual/Predicted | Approved (0) | Rejected (1) | Total
-Good (0)         | 85,000       | 288          | 85,288
-Bad (1)          | 12,308       | 11,592       | 23,900
-Total            | 97,308       | 11,880       | 109,188
+Good (0)         | 92,381       | 2,518        | 94,899
+Bad (1)          | 8,598        | 15,302       | 23,900
+Total            | 100,979      | 17,820       | 118,799
 ```
 
 ### Key Metrics
-- **Recall (Sensitivity)**: 48.5% - Defaulters caught
-- **Precision**: 97.6% - Quality of rejections
-- **Specificity**: 99.7% - Good customers approved
-- **Accuracy**: 87.2% - Overall correctness
+- **Recall (Sensitivity)**: 64.0% - Defaulters caught
+- **Precision**: 85.9% - Quality of rejections
+- **Specificity**: 97.3% - Good customers approved
+- **Accuracy**: 90.6% - Overall correctness
 - **Approval Rate**: 85% - Business volume maintained
 
 ### Business Impact

@@ -1,6 +1,6 @@
 # Credit Risk Engine
 
-A machine learning project for credit risk assessment using LightGBM.
+A machine learning project for credit risk assessment using LightGBM and FastAPI.
 
 ## Project Structure
 
@@ -29,10 +29,13 @@ A machine learning project for credit risk assessment using LightGBM.
 
 ## Setup
 
-1. Install dependencies: `pip install -r requirements.txt`
-2. Place data files in `data/raw/`
-3. Run training: `python src/train_pipeline.py`
-4. Start API: `uvicorn api.main:app --reload`
+- Install dependencies:
+  - `pip install -r requirements.txt`
+- Place data files in `data/raw/`
+- Train model (logs to MLflow and saves to models/):
+  - `python src/train_pipeline.py`
+- Start API locally:
+  - `python -m uvicorn api.main:app --host 127.0.0.1 --port 8000`
 
 ## Docker
 
@@ -49,29 +52,43 @@ Or with docker-compose:
 docker-compose up
 ```
 
-## API Usage
+## API Overview
 
-POST to /predict with JSON of features.
+Endpoints:
+- `GET /healthz` – liveness check
+- `GET /readiness` – verifies model is loaded and can score
+- `GET /version` – model metadata (path, hash, features, threshold)
+- `POST /predict` – returns probability of default and decision
+- `POST /explain` – returns probability and SHAP feature contributions
 
-Example:
-
+Request schema for `/predict` and `/explain`:
 ```json
 {
-  "age": 30,
-  "annual_income": 50000,
+  "annual_income": 50000.0,
+  "debt_to_income_ratio": 0.25,
   "credit_score": 700,
-  "employment_status": "employed",
-  ...
+  "loan_amount": 200000.0,
+  "interest_rate": 4.5,
+  "gender": "Female",
+  "marital_status": "Single",
+  "education_level": "Bachelor's",
+  "employment_status": "Employed",
+  "loan_purpose": "Home",
+  "grade_subgrade": "A1"
 }
 ```
 
-Response: {"probability": 0.3, "decision": "APPROVE"}
+Decision logic:
+- Model outputs probability of class 1 = default
+- Threshold loaded from `models/threshold.json` (default 0.4542)
+- Decision = `REJECT` if probability ≥ threshold, else `APPROVE`
 
 ## Monitoring
 
-- Data drift: Run PSI calculations
-- Model drift: Check KS statistic
+- Data drift: PSI calculations (`src/monitoring/`)
+- Model drift: KS statistic over time
+- MLflow for experiment tracking
 
 ## Tests
 
-Run tests: `pytest`
+- Run tests: `pytest`

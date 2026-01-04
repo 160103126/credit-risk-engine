@@ -7,4 +7,4 @@ app.include_router(router)
 
 @app.get("/")
 def root():
-    return {"message": "Credit Risk Engine API"}
+    return {"message": "Credit Risk Engine API"} 

@@ -1,0 +1,10 @@
+artifact_location: file:///C:/MachineLearning/credit-risk-engine/mlruns/866294776621734270/models/m-cb5bf81cf4af400d868b65425cc6d73a/artifacts
+creation_timestamp: 1767500874001
+experiment_id: '866294776621734270'
+last_updated_timestamp: 1767500914309
+model_id: m-cb5bf81cf4af400d868b65425cc6d73a
+model_type: null
+name: model
+source_run_id: 4f2d312c1bba4240afc5e9a054a6585b
+status: 2
+status_message: null

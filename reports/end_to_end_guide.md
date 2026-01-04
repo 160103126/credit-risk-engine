@@ -19,7 +19,7 @@ This guide walks through the complete process of building, deploying, and monito
 ### Feature Engineering
 - **Additional Features**: None added (data is clean)
 - **Scaling**: Not needed (tree-based model)
-- **Code**: `src/features/build_features.py`
+- **Code**: N/A (no additional features module in current version)
 
 ## 2. Model Development
 
@@ -28,8 +28,8 @@ This guide walks through the complete process of building, deploying, and monito
 - **Why**: Better performance than XGBoost for this dataset, built-in categorical support
 
 ### Training Setup
-- **Split**: 80/20 train/validation with stratification
-- **Monotonic Constraints**: DTI (+1), credit_score (-1) for business logic
+- **Split**: 80/20 train/validation with stratification + 5-fold CV for thresholds
+- **Monotonic Constraints**: `credit_score` (-1)
 - **Hyperparameters**: n_estimators=1000, learning_rate=0.05
 - **Code**: `src/model/train.py`
 
@@ -54,6 +54,7 @@ This guide walks through the complete process of building, deploying, and monito
 - **API**: FastAPI with Pydantic schemas
 - **Containerization**: Docker + docker-compose
 - **Serving**: Real-time predictions
+- **Health**: `/healthz`, `/readiness`, `/version` endpoints
 - **Code**: `api/`, `Dockerfile`
 
 ## 6. Monitoring

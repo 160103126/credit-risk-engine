@@ -5,33 +5,53 @@ The Credit Risk Engine exposes a REST API for real-time credit risk predictions 
 
 ## Endpoints
 
-### POST /predict
-Predicts credit risk for a single application.
+### GET /healthz
+Liveness check. Returns:
+```json
+{"status": "ok"}
+```
 
-#### Request Body
+### GET /readiness
+Readiness probe. Verifies model is loaded and can score a synthetic request. Returns:
+```json
+{"status": "ready"}
+```
+
+### GET /version
+Model and deployment metadata. Example:
 ```json
 {
-  "age": 30,
-  "annual_income": 50000.0,
-  "credit_score": 700,
-  "employment_status": "employed",
-  "education_level": "bachelor",
-  "experience": 5,
-  "marital_status": "single",
-  "number_of_dependents": 0,
-  "loan_purpose": "home",
-  "loan_amount": 200000.0,
-  "loan_term": 30,
-  "interest_rate": 4.5,
-  "monthly_debt_payments": 1000.0,
-  "credit_card_utilization": 0.3,
-  "number_of_credit_inquiries": 2,
-  "debt_to_income_ratio": 0.25,
-  "home_ownership_status": "owned"
+  "model_path": "models/lgb_model.pkl",
+  "model_sha256": "...",
+  "model_mtime": "2026-01-03T12:34:56",
+  "model_size_bytes": 123456,
+  "model_class": "LGBMClassifier",
+  "feature_names": ["annual_income", "debt_to_income_ratio", ...],
+  "threshold": 0.4542
 }
 ```
 
-#### Response
+### POST /predict
+Predicts probability of default and returns approve/reject decision.
+
+Request Body:
+```json
+{
+  "annual_income": 50000.0,
+  "debt_to_income_ratio": 0.25,
+  "credit_score": 700,
+  "loan_amount": 200000.0,
+  "interest_rate": 4.5,
+  "gender": "Female",
+  "marital_status": "Single",
+  "education_level": "Bachelor's",
+  "employment_status": "Employed",
+  "loan_purpose": "Home",
+  "grade_subgrade": "A1"
+}
+```
+
+Response:
 ```json
 {
   "probability": 0.123,
@@ -39,38 +59,61 @@ Predicts credit risk for a single application.
 }
 ```
 
-- **probability**: Float between 0-1, higher = higher risk
-- **decision**: "APPROVE" if probability < threshold, else "REJECT"
+- `probability`: Probability of class 1 (default). Higher = higher risk.
+- `decision`: `REJECT` if probability ≥ threshold else `APPROVE`.
 
-#### Error Responses
+Notes:
+- Categorical inputs are converted to pandas Categorical internally; unknown labels are allowed.
+- Feature order is aligned to the model’s training order internally.
+
+### POST /explain
+Returns probability and SHAP feature contributions (sorted by absolute impact).
+
+Response:
+```json
+{
+  "probability": 0.123,
+  "shap": [
+    {"feature": "credit_score", "shap_value": -0.042},
+    {"feature": "debt_to_income_ratio", "shap_value": 0.033}
+  ]
+}
+```
+
+## Error Responses
 - 400: Invalid input data
 - 500: Internal server error
 
 ## Data Types
-- **Numerical**: age, annual_income, etc. as float/int
-- **Categorical**: employment_status, etc. as string (will be encoded internally)
+- Numerical: `annual_income`, `debt_to_income_ratio`, `credit_score`, `loan_amount`, `interest_rate`
+- Categorical: `gender`, `marital_status`, `education_level`, `employment_status`, `loan_purpose`, `grade_subgrade`
 
 ## Authentication
-None implemented - add API keys for production.
+None implemented. For production, add API keys or OAuth.
 
 ## Rate Limiting
-Not implemented - consider adding for production.
+Not implemented. Consider gateway-level rate limiting for production.
 
 ## Deployment
-- **Local**: `uvicorn api.main:app --reload`
-- **Docker**: `docker-compose up`
-- **Cloud**: Deploy to AWS/GCP/Azure with load balancer
+- Local: `python -m uvicorn api.main:app --host 127.0.0.1 --port 8000`
+- Docker: `docker-compose up`
+- Cloud: Deploy behind a load balancer with health/readiness probes
 
 ## Testing
-Use tools like Postman or curl:
+Use curl or Postman:
 ```bash
-curl -X POST "http://localhost:8000/predict" -H "Content-Type: application/json" -d @request.json
+curl -s http://localhost:8000/healthz
+curl -s http://localhost:8000/version
+curl -s -X POST "http://localhost:8000/predict" -H "Content-Type: application/json" \
+  -d '{"annual_income":50000.0,"debt_to_income_ratio":0.25,"credit_score":700,"loan_amount":200000.0,"interest_rate":4.5,
+       "gender":"Female","marital_status":"Single","education_level":"Bachelor\'s","employment_status":"Employed",
+       "loan_purpose":"Home","grade_subgrade":"A1"}'
 ```
 
 ## Monitoring
-- Log all predictions for audit trail
-- Track API performance (latency, errors)
-- Integrate with monitoring tools (Prometheus, Grafana)
+- Track API latency, error rates
+- Log predictions for audit (avoid PII)
+- Integrate Prometheus/Grafana where available
 
 ## Versioning
-- API version in URL path (e.g., /v1/predict) for future changes
+If API changes are expected, version via path (e.g., `/v1/predict`).

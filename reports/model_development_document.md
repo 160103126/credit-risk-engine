@@ -135,9 +135,9 @@ random_state: 42
 5. Generate SHAP explanations
 
 ### Performance Metrics
-- **AUC**: 0.85 (excellent discrimination)
+- **AUC**: 0.92 (excellent discrimination)
 - **KS Statistic**: 0.45 (strong separation)
-- **Cross-Validation AUC**: Mean 0.84 ± 0.02
+- **Cross-Validation AUC**: Mean 0.9211 ± 0.0007
 
 ### Model Artifacts
 - **Model File**: `models/lgb_model.pkl`

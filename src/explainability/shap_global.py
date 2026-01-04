@@ -1,12 +1,13 @@
 import shap
 import lightgbm as lgb
 import matplotlib.pyplot as plt
+from .shap_cache import get_explainer
 
 def global_shap(model, X, max_display=15):
     """
     Generate global SHAP summary plot.
     """
-    explainer = shap.TreeExplainer(model)
+    explainer = get_explainer(model)
     shap_values = explainer(X)
     shap.summary_plot(shap_values, X, max_display=max_display)
     plt.savefig('reports/shap_summary.png')

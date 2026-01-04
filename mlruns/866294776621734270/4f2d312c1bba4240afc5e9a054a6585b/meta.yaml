@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/MachineLearning/credit-risk-engine/mlruns/866294776621734270/4f2d312c1bba4240afc5e9a054a6585b/artifacts
+end_time: 1767500914810
+entry_point_name: ''
+experiment_id: '866294776621734270'
+lifecycle_stage: active
+run_id: 4f2d312c1bba4240afc5e9a054a6585b
+run_name: glamorous-swan-324
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1767500827664
+status: 3
+tags: []
+user_id: prade

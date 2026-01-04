@@ -5,8 +5,10 @@ import joblib
 import json
 import os
 from src.data.load_data import load_config
-import shap
 import numpy as np
+from src.explainability.shap_cache import get_explainer
+import hashlib
+from datetime import datetime
 
 router = APIRouter()
 
@@ -16,6 +18,9 @@ models_dir = config.get('paths', {}).get('models', 'models')
 model_path = os.path.join(models_dir, 'lgb_model.pkl')
 threshold_path = os.path.join(models_dir, 'threshold.json')
 
+# List of categorical columns that need to be converted to pandas Categorical dtype
+CATEGORICAL_COLUMNS = ['gender', 'marital_status', 'education_level', 'employment_status', 'loan_purpose', 'grade_subgrade']
+
 try:
     model = joblib.load(model_path)
 except Exception as e:
@@ -23,25 +28,21 @@ except Exception as e:
 
 # Load threshold (fallback to default if missing)
 threshold = 0.4542
-if os.path.exists(threshold_path):
-    try:
-        with open(threshold_path, 'r') as f:
-            th = json.load(f)
-            if isinstance(th, dict) and 'threshold' in th:
-                threshold = float(th['threshold'])
-            elif isinstance(th, dict) and 'reject_rate' in th:
-                # maintain backward compatibility
-                threshold = float(th.get('threshold', threshold))
-    except Exception:
-        pass
 
-# Lazy SHAP explainer
+try:
+    if os.path.exists(threshold_path):
+        with open(threshold_path, 'r') as f:
+            data = json.load(f)
+            threshold = float(data.get('threshold', threshold))
+except Exception:
+    pass
+
 _explainer = None
-def get_explainer():
+def get_api_explainer():
     global _explainer
     if _explainer is None:
         try:
-            _explainer = shap.TreeExplainer(model)
+            _explainer = get_explainer(model)
         except Exception:
             _explainer = None
     return _explainer
@@ -53,11 +54,12 @@ def predict_credit_risk(request: PredictionRequest):
         if model is None:
             raise HTTPException(status_code=500, detail="Model not loaded")
         df = pd.DataFrame([request.dict()])
-        # Convert categoricals safely
-        cat_cols = ['employment_status', 'education_level', 'marital_status', 'loan_purpose', 'home_ownership_status']
-        for col in cat_cols:
+
+        # Convert categorical columns to pandas Categorical
+        for col in CATEGORICAL_COLUMNS:
             if col in df.columns:
-                df[col] = df[col].astype('category')
+                df[col] = pd.Categorical(df[col])
+        
         proba = float(model.predict_proba(df)[:, 1][0])
         decision = "REJECT" if proba >= threshold else "APPROVE"
         return PredictionResponse(probability=proba, decision=decision)
@@ -73,12 +75,13 @@ def explain_credit_risk(request: PredictionRequest):
         if model is None:
             raise HTTPException(status_code=500, detail="Model not loaded")
         df = pd.DataFrame([request.dict()])
-        cat_cols = ['employment_status', 'education_level', 'marital_status', 'loan_purpose', 'home_ownership_status']
-        for col in cat_cols:
-            if col in df.columns:
-                df[col] = df[col].astype('category')
 
-        explainer = get_explainer()
+        # Convert categorical columns to pandas Categorical
+        for col in CATEGORICAL_COLUMNS:
+            if col in df.columns:
+                df[col] = pd.Categorical(df[col])
+
+        explainer = get_api_explainer()
         if explainer is None:
             raise HTTPException(status_code=500, detail="SHAP explainer not available")
 
@@ -99,3 +102,75 @@ def explain_credit_risk(request: PredictionRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+
+@router.get("/readiness")
+def readiness():
+    try:
+        if model is None:
+            raise HTTPException(status_code=500, detail="Model not loaded")
+
+        # Build a minimal synthetic row using model feature names if available
+        feature_names = list(getattr(model, 'feature_name_', []))
+        if not feature_names:
+            feature_names = [
+                'annual_income','debt_to_income_ratio','credit_score','loan_amount','interest_rate',
+                'gender','marital_status','education_level','employment_status','loan_purpose','grade_subgrade'
+            ]
+
+        sample = {}
+        for f in feature_names:
+            if f in CATEGORICAL_COLUMNS:
+                sample[f] = 'Unknown'
+            else:
+                sample[f] = 0
+
+        df = pd.DataFrame([sample])
+        for col in CATEGORICAL_COLUMNS:
+            if col in df.columns:
+                df[col] = pd.Categorical(df[col])
+
+        # Dry-run prediction
+        _ = float(model.predict_proba(df)[:, 1][0])
+        return {"status": "ready"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Not ready: {e}")
+
+
+@router.get("/version")
+def version():
+    try:
+        info = {"model_path": model_path, "threshold": threshold}
+        # File stats
+        try:
+            with open(model_path, "rb") as f:
+                data = f.read()
+                info["model_sha256"] = hashlib.sha256(data).hexdigest()
+        except Exception:
+            info["model_sha256"] = None
+        try:
+            mtime = os.path.getmtime(model_path)
+            info["model_mtime"] = datetime.fromtimestamp(mtime).isoformat()
+            info["model_size_bytes"] = os.path.getsize(model_path)
+        except Exception:
+            pass
+        # Model details
+        if model is not None:
+            info["model_class"] = type(model).__name__
+            try:
+                info["feature_names"] = list(getattr(model, "feature_name_", []))
+            except Exception:
+                info["feature_names"] = []
+        else:
+            info["model_class"] = None
+            info["feature_names"] = []
+        return info
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

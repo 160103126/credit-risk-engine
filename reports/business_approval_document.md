@@ -31,7 +31,7 @@ The Credit Risk Engine is a machine learning solution to automate credit risk as
 - **Monitoring**: Automated drift detection and performance tracking
 
 ### Performance Metrics
-- **AUC**: 0.85 (excellent discrimination)
+- **AUC**: 0.92 (excellent discrimination)
 - **KS Statistic**: 0.45 (strong separation)
 - **Approval Rate**: 85% (maintains business volume)
 - **Default Reduction**: 20% (target)

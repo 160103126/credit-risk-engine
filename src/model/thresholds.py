@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, roc_auc_score
 
 def calculate_threshold(y_prob, reject_rate):
     """
@@ -20,6 +20,8 @@ def evaluate_reject_rate(y_true, y_prob, reject_rate):
     recall = TP / (TP + FN) if (TP + FN) > 0 else 0
     precision = TP / (TP + FP) if (TP + FP) > 0 else 0
     specificity = TN / (TN + FP) if (TN + FP) > 0 else 0
+    auc = roc_auc_score(y_true, y_prob)
+    approval_rate = 1 - reject_rate  # Since reject_rate is the rate of predicted positives
 
     return {
         'reject_rate': reject_rate,
@@ -27,5 +29,7 @@ def evaluate_reject_rate(y_true, y_prob, reject_rate):
         'recall': recall,
         'precision': precision,
         'specificity': specificity,
+        'auc': auc,
+        'approval_rate': approval_rate,
         'TN': TN, 'FP': FP, 'FN': FN, 'TP': TP
     }

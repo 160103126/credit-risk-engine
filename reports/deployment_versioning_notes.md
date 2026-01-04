@@ -16,43 +16,33 @@
 - **Training Sample Size**: ~80,000 applications
 
 ### Performance Metrics
-- **AUC**: 0.85
+- **AUC**: 0.92
 - **KS Statistic**: 0.45
-- **Cross-Validation AUC**: 0.84 ± 0.02
+- **Cross-Validation AUC**: 0.9211 ± 0.0007
 
 ## 2. Feature Schema
 
-### Input Features (17)
-All features are required for scoring. Missing values will result in rejection.
+### Input Features
+Model expects the following features (numeric + categorical). Inference code converts object columns to pandas Categorical automatically and aligns feature order to the model’s training schema.
 
 ```json
 {
-  "age": "int64",
   "annual_income": "float64",
-  "credit_score": "int64",
-  "employment_status": "category",
-  "education_level": "category",
-  "experience": "int64",
-  "marital_status": "category",
-  "number_of_dependents": "int64",
-  "loan_purpose": "category",
-  "loan_amount": "float64",
-  "loan_term": "int64",
-  "interest_rate": "float64",
-  "monthly_debt_payments": "float64",
-  "credit_card_utilization": "float64",
-  "number_of_credit_inquiries": "int64",
   "debt_to_income_ratio": "float64",
-  "home_ownership_status": "category"
+  "credit_score": "int64",
+  "loan_amount": "float64",
+  "interest_rate": "float64",
+  "gender": "category",
+  "marital_status": "category",
+  "education_level": "category",
+  "employment_status": "category",
+  "loan_purpose": "category",
+  "grade_subgrade": "category"
 }
 ```
 
-### Categorical Mappings
-- **employment_status**: ['employed', 'unemployed', 'self-employed', 'retired', 'student']
-- **education_level**: ['high_school', 'bachelor', 'master', 'phd', 'other']
-- **marital_status**: ['single', 'married', 'divorced', 'widowed']
-- **loan_purpose**: ['home', 'car', 'education', 'business', 'other']
-- **home_ownership_status**: ['owned', 'rented', 'mortgaged']
+### Categorical Handling
+Categorical columns are coerced to pandas Categorical without fixed category lists. Unknown labels are allowed and handled by LightGBM at inference.
 
 ### Data Types & Ranges
 - **Age**: 18-100
@@ -98,15 +88,16 @@ joblib==1.3.0
 - **Docker Image**: `credit-risk-engine:v1.0`
 - **Base Image**: `python:3.9-slim`
 - **Port**: 8000
-- **Health Check**: `/health` endpoint
+- **Health Checks**: `/healthz` (liveness), `/readiness` (readiness)
 
 ## 5. API Specification
 
-### Endpoint: POST /predict
-- **Input**: JSON with feature dictionary
-- **Output**: JSON with probability and decision
-- **Timeout**: 100ms
-- **Rate Limit**: 1000 requests/minute
+### Endpoints
+- **GET /healthz**: Liveness check
+- **GET /readiness**: Model loaded and dry-run predict
+- **GET /version**: Model metadata and threshold
+- **POST /predict**: Probability of default and approve/reject decision
+- **POST /explain**: Probability with SHAP contributions
 
 ### Error Handling
 - **400**: Invalid input format
@@ -140,10 +131,10 @@ joblib==1.3.0
 - **Load Tests**: 1000 concurrent requests
 
 ### Validation Checks
-- **Feature Consistency**: Same features as training
+- **Feature Consistency**: API aligns inputs to training schema
 - **Output Range**: Probabilities between 0-1
 - **Deterministic**: Same input → same output
-- **Threshold Application**: Correct approve/reject logic
+- **Threshold Application**: Applied in API (not in training)
 
 ## 8. Monitoring & Alerting
 

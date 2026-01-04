@@ -26,28 +26,28 @@ Good (0)         | 94611        | 288
 Bad (1)          | 12308        | 11592
 ```
 
-- **TN (True Negative)**: 94611 - Good customers approved
-- **FP (False Positive)**: 288 - Good customers rejected (opportunity cost)
-- **FN (False Negative)**: 12308 - Bad customers approved (financial loss)
-- **TP (True Positive)**: 11592 - Bad customers rejected
+- **TN (True Negative)**: 92381 - Good customers approved
+- **FP (False Positive)**: 2518 - Good customers rejected (opportunity cost)
+- **FN (False Negative)**: 8598 - Bad customers approved (financial loss)
+- **TP (True Positive)**: 15302 - Bad customers rejected
 
 ### Derived Metrics
-- **Recall (Sensitivity)**: 11592 / (11592 + 12308) = 48.5% - Bad customers caught
-- **Precision**: 11592 / (11592 + 288) = 97.6% - Quality of rejections
-- **Specificity**: 94611 / (94611 + 288) = 99.7% - Good customers approved
-- **Accuracy**: (94611 + 11592) / total = 87.2%
+- **Recall (Sensitivity)**: 15302 / (15302 + 8598) = 64.0% - Bad customers caught
+- **Precision**: 15302 / (15302 + 2518) = 85.9% - Quality of rejections
+- **Specificity**: 92381 / (92381 + 2518) = 97.3% - Good customers approved
+- **Accuracy**: (92381 + 15302) / total = 90.6%
 
 ## Threshold Selection
 - **Reject Rate**: 15% (top 15% riskiest customers rejected)
 - **Threshold**: 0.4542 (probability > this → reject)
-- **Why 15%**: Balances business risk and approval rates. Tested 5%, 10%, 15%, 20% - 15% provides good recall (48.5%) with high precision (97.6%).
+- **Why 15%**: Balances business risk and approval rates. Tested 5%, 10%, 15%, 20% - 15% provides good recall (64.0%) with high precision (85.9%).
 
 ## Cross-Validation Results
-- **5-Fold CV AUC**: Mean 0.84, Std 0.02
+- **5-Fold CV AUC**: Mean 0.9211, Std 0.0007
 - **Stability**: Low variance indicates robust model across data splits.
 
 ## Business Interpretation
-- **Cost-Benefit**: Rejecting 15% catches 48.5% of defaulters while approving 84.7% of good customers.
+- **Cost-Benefit**: Rejecting 15% catches 64.0% of defaulters while approving 84.7% of good customers.
 - **Risk Management**: Monotonic constraints ensure logical behavior (higher DTI → higher risk).
 - **Regulatory Compliance**: Explainable model with clear thresholds for auditability.
 
