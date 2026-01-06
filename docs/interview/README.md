@@ -4,38 +4,34 @@ This folder contains comprehensive, interview-ready documentation on all key con
 
 ## Document Roadmap
 
+### 0. **Package Overview**
+   - [00_DOCUMENTATION_COMPLETE.md](00_DOCUMENTATION_COMPLETE.md) - Navigation guide and prep plan
+
 ### 1. **Model Performance Metrics**
-   - [01_KS_Statistic.md](01_KS_Statistic.md) - KS = 0.45 (what it is, how calculated, why it matters)
-   - [02_AUC_ROC.md](02_AUC_ROC.md) - AUC = 0.92 (interpretation, threshold-independence, why better than accuracy)
+   - [01_KS_Statistic.md](01_KS_Statistic.md) - KS = 0.45 (calculation, interpretation, stability)
+   - [02_AUC_ROC.md](02_AUC_ROC.md) - AUC = 0.92 (threshold-independence, ROC, CV stability)
 
 ### 2. **Threshold & Decision Logic**
-   - [03_Threshold_Selection.md](03_Threshold_Selection.md) - How we chose 0.4542 (15% reject rate, cross-validation approach)
-   - [04_Decision_Logic.md](04_Decision_Logic.md) - Probability → APPROVE/REJECT (threshold rule, business rules)
+   - [03_Threshold_Selection.md](03_Threshold_Selection.md) - How we chose 0.4542 (15% reject rate, 5-fold CV)
+   - [04_Decision_Logic.md](04_Decision_Logic.md) - Probability → APPROVE/REJECT (threshold rule, confidence, errors)
 
-### 3. **Model Understanding**
-   - [05_LightGBM_Architecture.md](05_LightGBM_Architecture.md) - Why LightGBM (categorical support, speed, performance)
-   - [06_Monotonic_Constraints.md](06_Monotonic_Constraints.md) - credit_score: -1 (enforcing business logic)
-   - [07_Feature_Importance.md](07_Feature_Importance.md) - Top features (debt_to_income_ratio, credit_score, etc.)
+### 3. **Model Architecture & Constraints**
+   - [05_LightGBM_Architecture.md](05_LightGBM_Architecture.md) - Why LightGBM (speed, categorical support, performance)
+   - [06_Monotonic_Constraints.md](06_Monotonic_Constraints.md) - credit_score: -1 (business logic enforcement)
 
-### 4. **Explainability**
-   - [08_SHAP_Explainability.md](08_SHAP_Explainability.md) - SHAP values, global/individual/dependence plots
-   - [09_Feature_Contributions.md](09_Feature_Contributions.md) - How features affect individual predictions
+### 4. **Validation & Stability**
+   - [07_Cross_Validation.md](07_Cross_Validation.md) - 5-fold stratified CV (83:17 preserved, ±0.0007 AUC std)
 
-### 5. **Data & Preprocessing**
-   - [10_Categorical_Encoding.md](10_Categorical_Encoding.md) - Why pandas Categorical (no fixed mappings)
-   - [11_Data_Preprocessing.md](11_Data_Preprocessing.md) - Target creation (default = 1-loan_paid_back), column drops
-   - [12_Imbalanced_Data.md](12_Imbalanced_Data.md) - Class imbalance, why AUC/KS > accuracy
+### 5. **Data & Features**
+   - [08_Categorical_Encoding.md](08_Categorical_Encoding.md) - pandas Categorical, unknown handling, alternatives
+   - [09_Data_Preprocessing.md](09_Data_Preprocessing.md) - Target creation (1-default), column drops, no scaling
+   - [10_Feature_Importance.md](10_Feature_Importance.md) - What drives risk (DTI 28%, credit_score 22%, etc.)
 
-### 6. **Validation & Testing**
-   - [13_Cross_Validation.md](13_Cross_Validation.md) - 5-fold stratified CV (why, how stable)
-   - [14_Train_Validation_Split.md](14_Train_Validation_Split.md) - 80/20 with stratification
+### 6. **Explainability**
+   - [11_SHAP_Explainability.md](11_SHAP_Explainability.md) - SHAP for approvals/rejections (John vs. Alice)
 
-### 7. **API & Deployment**
-   - [15_API_Design.md](15_API_Design.md) - /predict, /explain, /healthz, /readiness, /version
-   - [16_Categorical_Coercion.md](16_Categorical_Coercion.md) - How API ensures LightGBM compatibility
-
-### 8. **Key Decisions & Trade-offs**
-   - [17_Why_These_Choices.md](17_Why_These_Choices.md) - Model selection, metrics, threshold (business vs. ML)
+### 7. **MLOps & Tracking**
+   - [12_MLflow_Tracking.md](12_MLflow_Tracking.md) - Tracking URI, experiment, logging, production usage
 
 ---
 

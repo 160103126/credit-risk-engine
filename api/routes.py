@@ -1,14 +1,18 @@
-from fastapi import APIRouter, HTTPException
-from .schema import PredictionRequest, PredictionResponse
-import pandas as pd
-import joblib
+import hashlib
 import json
 import os
-from src.data.load_data import load_config
-import numpy as np
-from src.explainability.shap_cache import get_explainer
-import hashlib
+import time
 from datetime import datetime
+
+import joblib
+import numpy as np
+import pandas as pd
+from fastapi import APIRouter, HTTPException
+from prometheus_client import Counter, Histogram
+
+from src.data.load_data import load_config
+from src.explainability.shap_cache import get_explainer
+from .schema import PredictionRequest, PredictionResponse
 
 router = APIRouter()
 
@@ -48,8 +52,23 @@ def get_api_explainer():
     return _explainer
 
 
+# Prometheus metrics
+REQUEST_COUNTER = Counter(
+    "api_requests_total",
+    "Total API requests",
+    labelnames=["endpoint", "status"],
+)
+
+REQUEST_LATENCY = Histogram(
+    "api_request_latency_seconds",
+    "API request latency in seconds",
+    labelnames=["endpoint"],
+)
+
+
 @router.post("/predict", response_model=PredictionResponse)
 def predict_credit_risk(request: PredictionRequest):
+    start = time.perf_counter()
     try:
         if model is None:
             raise HTTPException(status_code=500, detail="Model not loaded")
@@ -62,15 +81,22 @@ def predict_credit_risk(request: PredictionRequest):
         
         proba = float(model.predict_proba(df)[:, 1][0])
         decision = "REJECT" if proba >= threshold else "APPROVE"
+        REQUEST_COUNTER.labels(endpoint="predict", status="success").inc()
+        REQUEST_LATENCY.labels(endpoint="predict").observe(time.perf_counter() - start)
         return PredictionResponse(probability=proba, decision=decision)
     except HTTPException:
+        REQUEST_COUNTER.labels(endpoint="predict", status="error").inc()
+        REQUEST_LATENCY.labels(endpoint="predict").observe(time.perf_counter() - start)
         raise
     except Exception as e:
+        REQUEST_COUNTER.labels(endpoint="predict", status="error").inc()
+        REQUEST_LATENCY.labels(endpoint="predict").observe(time.perf_counter() - start)
         raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.post("/explain")
 def explain_credit_risk(request: PredictionRequest):
+    start = time.perf_counter()
     try:
         if model is None:
             raise HTTPException(status_code=500, detail="Model not loaded")
@@ -97,10 +123,16 @@ def explain_credit_risk(request: PredictionRequest):
         contributions = sorted(contributions, key=lambda x: abs(x['shap_value']), reverse=True)
 
         proba = float(model.predict_proba(df)[:, 1][0])
+        REQUEST_COUNTER.labels(endpoint="explain", status="success").inc()
+        REQUEST_LATENCY.labels(endpoint="explain").observe(time.perf_counter() - start)
         return {"probability": proba, "shap": contributions}
     except HTTPException:
+        REQUEST_COUNTER.labels(endpoint="explain", status="error").inc()
+        REQUEST_LATENCY.labels(endpoint="explain").observe(time.perf_counter() - start)
         raise
     except Exception as e:
+        REQUEST_COUNTER.labels(endpoint="explain", status="error").inc()
+        REQUEST_LATENCY.labels(endpoint="explain").observe(time.perf_counter() - start)
         raise HTTPException(status_code=400, detail=str(e))
 
 

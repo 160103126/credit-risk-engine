@@ -6,6 +6,7 @@ shap
 fastapi
 uvicorn
 pydantic
+prometheus_client
 mlflow
 pytest
 pyyaml

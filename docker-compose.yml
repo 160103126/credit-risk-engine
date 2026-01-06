@@ -1,11 +1,90 @@
-version: '3.8'
+version: "3.9"
 
 services:
+  postgres:
+    image: postgres:14
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow
+      POSTGRES_DB: mlflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    volumes:
+      - minio:/data
+    ports:
+      - "9000:9000"  # S3 API
+      - "9001:9001"  # MinIO console
+
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - minio
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql://mlflow:mlflow@postgres:5432/mlflow
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: s3://mlflow/
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      AWS_ACCESS_KEY_ID: minio
+      AWS_SECRET_ACCESS_KEY: minio123
+    ports:
+      - "5000:5000"
+
+  prometheus:
+    image: prom/prometheus:v2.49.1
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - promdata:/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:10.2.3
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafanadata:/var/lib/grafana
+
   api:
+    # Replace with your actual API image or uncomment build context
+    # image: credit-risk-api:latest
     build: .
+    restart: unless-stopped
+    environment:
+      DECISION_THRESHOLD: "0.4542"
+      MODEL_RUN_ID: "<set_your_mlflow_run_id_here>"
+      MLFLOW_TRACKING_URI: "http://mlflow:5000"
+      MLFLOW_S3_ENDPOINT_URL: "http://minio:9000"
+      AWS_ACCESS_KEY_ID: "minio"
+      AWS_SECRET_ACCESS_KEY: "minio123"
+      PYTHONPATH: /app
+    depends_on:
+      - mlflow
     ports:
       - "8000:8000"
-    volumes:
-      - ./models:/app/models
-    environment:
-      - PYTHONPATH=/app
+
+volumes:
+  pgdata:
+  minio:
+  promdata:
+  grafanadata:
